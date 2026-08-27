@@ -45,6 +45,15 @@ interface BaseEnumInterface {
   public static function createFromValue(string $value): static;
 
   /**
+   * recupere les enums à partir des string.
+   * Elle peut aussi servir de validation.
+   *
+   * @param array<string> $values
+   * @return static[]
+   */
+  public static function createFromValues(array $values): array;
+
+  /**
    * Crée une instance à partir d'un libellé
    *
    * @throws \InvalidArgumentException si le libellé n'existe pas

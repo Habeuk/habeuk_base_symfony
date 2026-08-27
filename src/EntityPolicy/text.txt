@@ -1,0 +1,17 @@
+src/
+└── EntityPolicy/
+    ├── EntityAccessChecker.php
+    ├── EntityConfigurationValidator.php
+    ├── AccessCheckResult.php
+    ├── Exception/
+    │   └── InvalidEntityConfigurationException.php
+    ├── Contract/
+    │   └── EntityAccessCheckerInterface.php
+    └── Rule/
+    
+enabled
+→ roles
+→ permissions
+→ cardinality
+→ scope
+→ permission entreprise

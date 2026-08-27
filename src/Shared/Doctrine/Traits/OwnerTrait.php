@@ -1,5 +1,5 @@
 <?php
-namespace App\Shared\Doctrine\Traits;
+namespace Habeuk\HbkSymfony\Shared\Doctrine\Traits;
 
 use App\Entity\User;
 use Doctrine\ORM\Mapping as ORM;
