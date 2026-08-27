@@ -9,9 +9,7 @@ use App\Entity\User;
 use Habeuk\HbkSymfony\EntityPolicy\Contract\EntityAccessCheckerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
-use Habeuk\HbkSymfony\Enum\BaseEnumInterface;
 use Habeuk\HbkSymfony\Enum\RoleInterface;
-use Habeuk\HbkSymfony\Enum\ScopeEnum;
 use Habeuk\HbkSymfony\Repository\BaseRepository;
 use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
 
@@ -102,11 +100,17 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
     if ($entity instanceof BaseEntityInterface) {
       return null;
     }
-    return match ($entityConfig->getScope()) {
-      ScopeEnum::PERSONAL => $this->checkPersonalScope($entity, $user),
-      ScopeEnum::GLOBAL => $this->checkGlobalScope($entity, $entityConfig, $user, $action),
-      ScopeEnum::RESTRICTED => AccessCheckResult::denied('L’accès restreint n’est pas encore disponible.')
-    };
+    $scope = $entityConfig->getScope();
+    if ($scope->isPersonal()) {
+      return $this->checkPersonalScope($entity, $user);
+    }
+    if ($scope->isGlobal()) {
+      return $this->checkGlobalScope($entity, $entityConfig, $user, $action);
+    }
+    if ($scope->isRestricted()) {
+      return AccessCheckResult::denied('L’accès restreint n’est pas encore disponible.');
+    }
+    return AccessCheckResult::denied("Aucun scope n'est definie");
   }
 
   private function checkPersonalScope(object $entityInstance, User $user): ?AccessCheckResult {

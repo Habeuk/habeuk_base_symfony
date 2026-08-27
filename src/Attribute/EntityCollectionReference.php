@@ -8,7 +8,7 @@ class EntityCollectionReference {
   /**
    *
    * @param class-string $entityClass
-   * @param class-string $target_field Champ de reference lors du trie ou de la recherche.
+   * @param string $target_field Champ de reference lors du trie ou de la recherche.
    */
   public function __construct(public string $entityClass, public string $target_field = "name") {}
 }

@@ -66,7 +66,7 @@ enum PermissionEnum: string implements BaseEnumInterface {
   /**
    * Permissions de base (CRUD)
    *
-   * @return array<int, \App\Enum\PermissionEnum::CREATE|\App\Enum\PermissionEnum::DELETE|\App\Enum\PermissionEnum::EDIT|\App\Enum\PermissionEnum::VIEW>
+   * @return array<int, \Habeuk\HbkSymfony\Enum\PermissionEnum::CREATE|\Habeuk\HbkSymfony\Enum\PermissionEnum::DELETE|\Habeuk\HbkSymfony\Enum\PermissionEnum::EDIT|\Habeuk\HbkSymfony\Enum\PermissionEnum::VIEW>
    */
   public static function basic(): array {
     return [
@@ -80,7 +80,7 @@ enum PermissionEnum: string implements BaseEnumInterface {
   /**
    * Lecture seule
    *
-   * @return array<int, \App\Enum\PermissionEnum::VIEW>
+   * @return array<int, \Habeuk\HbkSymfony\Enum\PermissionEnum::VIEW>
    */
   public static function readOnly(): array {
     return [

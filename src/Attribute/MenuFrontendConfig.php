@@ -10,110 +10,108 @@ final class MenuFrontendConfig {
 
   public const UNLIMITED = - 1;
 
-  public ScopeEnumInterface $scopeDefault;
-
   /**
    * Configuration du menu frontend et des règles d'accès aux entités.
    *
    * Les règles d'accès sont appliquées par le service
    *
-   * @see \App\Service\EntityDefinitionAccessControlService ============================================================
-   *      RÈGLES D'ACCÈS
-   *      ============================================================
+   * ============================================================
+   * RÈGLES D'ACCÈS
+   * ============================================================
    *
-   *      1. RÔLES ($roles)
-   *      - Définit quels rôles peuvent accéder à l'entité
-   *      - Exemple: ['ROLE_ADMIN', 'ROLE_USER']
+   * 1. RÔLES ($roles)
+   * - Définit quels rôles peuvent accéder à l'entité
+   * - Exemple: ['ROLE_ADMIN', 'ROLE_USER']
    *
-   *      2. PERMISSIONS ($permissions)
-   *      - Actions autorisées: ( voir ScopeEnum)
-   *      - Par défaut, [view, create, edit, delete] sont autorisées
+   * 2. PERMISSIONS ($permissions)
+   * - Actions autorisées: ( voir ScopeEnum)
+   * - Par défaut, [view, create, edit, delete] sont autorisées
    *
-   *      3. PROPRIÉTÉ ($requireOwnership)
-   *      - true: seul le propriétaire peut modifier/supprimer
-   *      - false: n'importe qui peut modifier/supprimer
-   *      - La vue (view) est toujours autorisée
+   * 3. PROPRIÉTÉ ($requireOwnership)
+   * - true: seul le propriétaire peut modifier/supprimer
+   * - false: n'importe qui peut modifier/supprimer
+   * - La vue (view) est toujours autorisée
    *
-   *      4. CARDINALITÉ ($cardinality)
-   *      - Nombre maximum d'éléments qu'un utilisateur peut créer
-   *      - -1: illimité (constante self::UNLIMITED)
-   *      - 1: un seul élément
-   *      - 10: maximum 10 éléments
+   * 4. CARDINALITÉ ($cardinality)
+   * - Nombre maximum d'éléments qu'un utilisateur peut créer
+   * - -1: illimité (constante self::UNLIMITED)
+   * - 1: un seul élément
+   * - 10: maximum 10 éléments
    *
-   *      5. PORTÉE ($scope)
-   *      - PERSONAL: l'utilisateur ne voit que ses propres données
-   *      - TEAM: les membres de l'équipe partagent les données
-   *      - GLOBAL: tous les utilisateurs voient toutes les données
-   *      - RESTRICTED: accès basé sur des règles spécifiques (pas impleté).
+   * 5. PORTÉE ($scope)
+   * - PERSONAL: l'utilisateur ne voit que ses propres données
+   * - TEAM: les membres de l'équipe partagent les données
+   * - GLOBAL: tous les utilisateurs voient toutes les données
+   * - RESTRICTED: accès basé sur des règles spécifiques (pas impleté).
    *
-   *      ============================================================
-   *      * NOTE SUR requireOwnership ET scope:
-   *      ============================================================
+   * ============================================================
+   * * NOTE SUR requireOwnership ET scope:
+   * ============================================================
    *
-   *      - PERSONAL: requireOwnership est ignoré (déjà propriétaire)
-   *      - TEAM: requireOwnership = true → équipe voit, seul le propriétaire modifie
-   *      - TEAM: requireOwnership = false → toute l'équipe voit et modifie
-   *      - GLOBAL: requireOwnership = true → tous voient, seul le propriétaire modifie
-   *      - GLOBAL: requireOwnership = false → tous voient et modifient
+   * - PERSONAL: requireOwnership est ignoré (déjà propriétaire)
+   * - TEAM: requireOwnership = true → équipe voit, seul le propriétaire modifie
+   * - TEAM: requireOwnership = false → toute l'équipe voit et modifie
+   * - GLOBAL: requireOwnership = true → tous voient, seul le propriétaire modifie
+   * - GLOBAL: requireOwnership = false → tous voient et modifient
    *
-   *      ============================================================
-   *      COMPLÉMENTARITÉ SCOPE / REQUIRE_OWNERSHIP
-   *      ============================================================
+   * ============================================================
+   * COMPLÉMENTARITÉ SCOPE / REQUIRE_OWNERSHIP
+   * ============================================================
    *
-   *      - $scope: détermine qui peut VOIR les données
-   *      - $requireOwnership: détermine qui peut MODIFIER les données
+   * - $scope: détermine qui peut VOIR les données
+   * - $requireOwnership: détermine qui peut MODIFIER les données
    *
-   *      Exemples:
+   * Exemples:
    *
-   *      // Personnel: je vois et je modifie mes données
-   *      scope: PERSONAL, requireOwnership: true
+   * // Personnel: je vois et je modifie mes données
+   * scope: PERSONAL, requireOwnership: true
    *
-   *      // Équipe: l'équipe voit, seul le propriétaire modifie
-   *      scope: TEAM, requireOwnership: true
+   * // Équipe: l'équipe voit, seul le propriétaire modifie
+   * scope: TEAM, requireOwnership: true
    *
-   *      // Équipe: toute l'équipe voit et modifie
-   *      scope: TEAM, requireOwnership: false
+   * // Équipe: toute l'équipe voit et modifie
+   * scope: TEAM, requireOwnership: false
    *
-   *      // Global: tout le monde voit, personne ne modifie
-   *      scope: GLOBAL, permissions: [VIEW]
+   * // Global: tout le monde voit, personne ne modifie
+   * scope: GLOBAL, permissions: [VIEW]
    *
-   *      // Restreint: accès contrôlé par des règles métier // ( non implemnter ).
-   *      scope: RESTRICTED
+   * // Restreint: accès contrôlé par des règles métier // ( non implemnter ).
+   * scope: RESTRICTED
    *
-   *      ============================================================
-   *      EXEMPLES D'UTILISATION
-   *      ============================================================
+   * ============================================================
+   * EXEMPLES D'UTILISATION
+   * ============================================================
    *
-   *      // Factures personnelles (CRUD complet)
-   *      #[MenuFrontendConfig(
-   *      enabled: true,
-   *      label: "Mes factures",
-   *      entity: "Invoice",
-   *      scope: ScopeEnum::PERSONAL,
-   *      requireOwnership: true
-   *      )]
+   * // Factures personnelles (CRUD complet)
+   * #[MenuFrontendConfig(
+   * enabled: true,
+   * label: "Mes factures",
+   * entity: "Invoice",
+   * scope: ScopeEnum::PERSONAL,
+   * requireOwnership: true
+   * )]
    *
-   *      // Devis avec limite (10 maximum)
-   *      #[MenuFrontendConfig(
-   *      enabled: true,
-   *      label: "Devis",
-   *      entity: "Quote",
-   *      scope: ScopeEnum::PERSONAL,
-   *      cardinality: 10,
-   *      requireOwnership: true
-   *      )]
+   * // Devis avec limite (10 maximum)
+   * #[MenuFrontendConfig(
+   * enabled: true,
+   * label: "Devis",
+   * entity: "Quote",
+   * scope: ScopeEnum::PERSONAL,
+   * cardinality: 10,
+   * requireOwnership: true
+   * )]
    *
-   *      // Archive publique (lecture seule)
-   *      #[MenuFrontendConfig(
-   *      enabled: true,
-   *      label: "Archive",
-   *      entity: "Archive",
-   *      scope: ScopeEnum::GLOBAL,
-   *      permissions: [PermissionEnum::VIEW],
-   *      requireOwnership: false
-   *      )]
+   * // Archive publique (lecture seule)
+   * #[MenuFrontendConfig(
+   * enabled: true,
+   * label: "Archive",
+   * entity: "Archive",
+   * scope: ScopeEnum::GLOBAL,
+   * permissions: [PermissionEnum::VIEW],
+   * requireOwnership: false
+   * )]
    *
-   *      ============================================================
+   * ============================================================
    *
    * @param bool $enabled Active/désactive l'entité dans le menu
    * @param string $label Libellé affiché dans le menu

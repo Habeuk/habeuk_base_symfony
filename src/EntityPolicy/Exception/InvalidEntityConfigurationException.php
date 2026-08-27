@@ -1,6 +1,6 @@
 <?php
 declare(strict_types = 1);
-namespace App\EntityPolicy\Exception;
+namespace Habeuk\HbkSymfony\EntityPolicy\Exception;
 
 use LogicException;
 

@@ -4,9 +4,9 @@ namespace Habeuk\HbkSymfony\EntityPolicy;
 
 use Habeuk\HbkSymfony\Attribute\MenuFrontendConfig;
 use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
-use App\Contract\BaseEntityInterface;
-use App\Contract\OwnerInterface;
-use App\EntityPolicy\Exception\InvalidEntityConfigurationException;
+use Habeuk\HbkSymfony\Contract\BaseEntityInterface;
+use Habeuk\HbkSymfony\Contract\OwnerInterface;
+use Habeuk\HbkSymfony\EntityPolicy\Exception\InvalidEntityConfigurationException;
 use Habeuk\HbkSymfony\Enum\ScopeEnumInterface;
 use ReflectionClass;
 
@@ -17,8 +17,6 @@ use ReflectionClass;
  *
  */
 final readonly class EntityConfigurationValidator {
-
-  function __construct(private readonly ScopeEnumInterface $scopeEnum) {}
 
   /**
    *
@@ -54,7 +52,7 @@ final readonly class EntityConfigurationValidator {
   }
 
   private function validateOwnerRequirement(string $entityClass, EntityConfigView $config): void {
-    $requiresOwner = $config->getScope() === $this->scopeEnum->isPersonal() || $config->requiresOwnership();
+    $requiresOwner = $config->getScope()->isPersonal() || $config->requiresOwnership();
     if (! $requiresOwner) {
       return;
     }

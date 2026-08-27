@@ -8,6 +8,11 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Json;
 
+/**
+ *
+ * @author stephane
+ * @extends AbstractType<null>
+ */
 class JsonEditorType extends AbstractType {
 
   public function configureOptions(OptionsResolver $resolver): void {
@@ -31,10 +36,9 @@ class JsonEditorType extends AbstractType {
   public function buildView(FormView $view, FormInterface $form, array $options): void {
     $view->vars['definitions'] = $options['definitions'];
 
-    if ($options['definitions']) {
+    if (isset($options['definitions']) && is_array($options['definitions'])) {
       $view->vars['attr']['data-definitions'] = json_encode($options['definitions'], JSON_THROW_ON_ERROR);
     }
-    $view->vars['attr']['data-mode'] = $options['definitions'] ? 'assistant' : 'json';
   }
 
   public function getParent(): string {

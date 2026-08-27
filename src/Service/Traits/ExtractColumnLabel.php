@@ -8,12 +8,24 @@ use Symfony\Component\Serializer\Attribute\Groups;
 
 trait ExtractColumnLabel {
 
+  /**
+   *
+   * @param \ReflectionProperty $property
+   * @param array<mixed> $groups
+   * @param array<mixed> $labels
+   */
   protected function extractFromProperty(\ReflectionProperty $property, array $groups, array &$labels): void {
     $this->extractColumnLabel($property, $groups, $labels);
     $this->addExtractEntityReference($property, $groups, $labels);
     $this->addExtractEntityCollectionReference($property, $groups, $labels);
   }
 
+  /**
+   *
+   * @param \ReflectionProperty $property
+   * @param array<mixed> $groups
+   * @param array<mixed> $labels
+   */
   private function addExtractEntityReference(\ReflectionProperty $property, array $groups, array &$labels): void {
     $attributes = $property->getAttributes(EntityReference::class);
     $groupsAttributes = $property->getAttributes(Groups::class);
@@ -34,6 +46,12 @@ trait ExtractColumnLabel {
     $labels[$fieldname]['target_field'] = $entityReference->target_field;
   }
 
+  /**
+   *
+   * @param \ReflectionProperty $property
+   * @param array<mixed> $groups
+   * @param array<mixed> $labels
+   */
   private function addExtractEntityCollectionReference(\ReflectionProperty $property, array $groups, array &$labels): void {
     $attributes = $property->getAttributes(EntityCollectionReference::class);
     $groupsAttributes = $property->getAttributes(Groups::class);

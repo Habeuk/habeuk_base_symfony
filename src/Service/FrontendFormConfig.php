@@ -5,14 +5,14 @@ use Habeuk\HbkSymfony\Attribute\ColumnLabel;
 use Habeuk\HbkSymfony\Attribute\MenuFrontendConfig;
 use App\Entity\User;
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
-use App\Form\Schema\FormSchemaBuilder;
+use Habeuk\HbkSymfony\Form\Schema\FormSchemaBuilder;
 use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
 use Habeuk\HbkSymfony\Utils\EntityClassHelper;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Habeuk\HbkSymfony\Service\Traits\ExtractEnumsFromDtoTrait;
-use Habeuk\HbkSymfony\Service\Traits\ExtractColumnLabel;
 use Habeuk\HbkSymfony\EntityPolicy\EntityAccessChecker;
 use Habeuk\HbkSymfony\EntityPolicy\EntityConfigProvider;
+use Habeuk\HbkSymfony\Service\Traits\ExtractColumnLabel;
 
 class FrontendFormConfig {
   use ExtractEnumsFromDtoTrait;
@@ -28,14 +28,14 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<mixed>
    */
-  public function getFormFields(string $formTypeClass, User $user, array $groups, int $companyId): array {
+  public function getFormFields(string $formTypeClass, User $user, array $groups): array {
     $cacheKey = $this->cacheManager->key('entity_form_fields', [
       'key' => $formTypeClass,
       'user_roles' => $user->getRoles(),
       'group' => $groups
     ]);
     // le cache doit etre uniquement à la creation.
-    $fields = $this->cacheManager->get($cacheKey, fn () => $this->doGetFormFields($formTypeClass, $user, $groups, $companyId));
+    $fields = $this->cacheManager->get($cacheKey, fn () => $this->doGetFormFields($formTypeClass, $user, $groups));
     if ($fields !== null)
       return $fields;
     $group = $groups[0];
@@ -51,14 +51,14 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<mixed>
    */
-  public function doGetFormFields(string $formTypeClass, User $user, array $groups, int $companyId): ?array {
+  public function doGetFormFields(string $formTypeClass, User $user, array $groups): ?array {
     PermissionEnum::validatedEnums($groups);
     $formTypeClass = EntityClassHelper::assertFormType($formTypeClass);
     $entityClass = EntityClassHelper::getEntityClassFromFormType($formTypeClass);
     if ($entityClass === null)
       throw new \ErrorException("L'entité $formTypeClass n'est pas valide");
-    $canCreate = $this->entityAccessChecker->canCreate($entityClass, $user, $companyId);
-    $canEdit = $this->entityAccessChecker->canEdit($entityClass, $user, $companyId);
+    $canCreate = $this->entityAccessChecker->canCreate($entityClass, $user);
+    $canEdit = $this->entityAccessChecker->canEdit($entityClass, $user);
     if (! ($canCreate->granted || $canEdit->granted)) {
       return null;
     }
@@ -72,7 +72,7 @@ class FrontendFormConfig {
     $dtoClass = EntityClassHelper::getDtoClassFromFormType($formTypeClass);
     if ($dtoClass === null)
       throw new \ErrorException("L'entité $dtoClass n'est pas valide");
-    $availablesFields = $this->getColumnLabels($dtoClass, $user, $groups, $companyId);
+    $availablesFields = $this->getColumnLabels($dtoClass, $user, $groups);
     $formOptions = [
       'current_user' => $user
     ];
@@ -87,16 +87,15 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<string, array<string,int|string|null>>
    */
-  public function getColumnLabels(string $dtoClass, User $user, array $groups, int $companyId): array {
+  public function getColumnLabels(string $dtoClass, User $user, array $groups): array {
     // Le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('column_labels', [
       'key' => $dtoClass,
       'user_roles' => $user->getRoles(),
-      'groups' => $groups,
-      'companyId' => $companyId
+      'groups' => $groups
     ]);
-    return $this->cacheManager->get($cacheKey, function () use ($dtoClass, $user, $groups, $companyId) {
-      return $this->doGetColumnLabels($dtoClass, $user, $groups, $companyId);
+    return $this->cacheManager->get($cacheKey, function () use ($dtoClass, $user, $groups) {
+      return $this->doGetColumnLabels($dtoClass, $user, $groups);
     });
   }
 
@@ -106,13 +105,13 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<mixed>
    */
-  private function doGetColumnLabels(string $dtoClass, User $user, array $groups, int $companyId): array {
+  private function doGetColumnLabels(string $dtoClass, User $user, array $groups): array {
     PermissionEnum::validatedEnums($groups);
     $entityClass = EntityClassHelper::getEntityClassFromDto($dtoClass);
     $labels = [];
     if ($entityClass === null)
       return $labels;
-    if (! $this->entityAccessChecker->canView($entityClass, $user, $companyId)->granted)
+    if (! $this->entityAccessChecker->canView($entityClass, $user)->granted)
       return $labels;
     $reflection = new \ReflectionClass($dtoClass);
     foreach ($reflection->getProperties() as $property) {
@@ -179,11 +178,10 @@ class FrontendFormConfig {
    * @param User $user
    * @return array<mixed>
    */
-  public function extractEnumsFromDto(string $dtoClass, User $user, int $companyId): array {
+  public function extractEnumsFromDto(string $dtoClass, User $user): array {
     $cacheKey = $this->cacheManager->key('all_enum_from_dto', [
       'key' => $dtoClass,
-      'user_roles' => $user->getRoles(),
-      'companyId' => $companyId
+      'user_roles' => $user->getRoles()
     ]);
     return $this->cacheManager->get($cacheKey, function () use ($dtoClass) {
       return $this->doExtractEnumsFromDto($dtoClass);
@@ -198,15 +196,14 @@ class FrontendFormConfig {
    * @param class-string $entityClass
    * @return EntityConfigView|null
    */
-  public function getEntityConfig(string $entityClass, User $user, int $companyId): EntityConfigView|null {
+  public function getEntityConfig(string $entityClass, User $user): EntityConfigView|null {
     // Le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('entity_config', [
       'key' => $entityClass,
-      'user_roles' => $user->getRoles(),
-      'companyId' => $companyId
+      'user_roles' => $user->getRoles()
     ]);
-    return $this->cacheManager->get($cacheKey, function () use ($entityClass, $user, $companyId) {
-      return $this->doGetEntityConfig($entityClass, $user, $companyId);
+    return $this->cacheManager->get($cacheKey, function () use ($entityClass, $user) {
+      return $this->doGetEntityConfig($entityClass, $user);
     });
   }
 
@@ -221,24 +218,24 @@ class FrontendFormConfig {
    *
    * @param class-string $entityClass
    */
-  private function doGetEntityConfig(string $entityClass, User $user, int $companyId): ?EntityConfigView {
+  private function doGetEntityConfig(string $entityClass, User $user): ?EntityConfigView {
     $config = self::getConfig($entityClass);
     if ($config === null) {
       return null;
     }
-    if (! $this->entityAccessChecker->canView($entityClass, $user, $companyId)->granted) {
+    if (! $this->entityAccessChecker->canView($entityClass, $user)->granted) {
       return null;
     }
     /** @var list<PermissionEnum> $actions */
     $actions = [];
     $actions[] = PermissionEnum::VIEW;
-    if ($this->entityAccessChecker->canCreate($entityClass, $user, $companyId)->granted) {
+    if ($this->entityAccessChecker->canCreate($entityClass, $user)->granted) {
       $actions[] = PermissionEnum::CREATE;
     }
-    if ($this->entityAccessChecker->canEdit($entityClass, $user, $companyId)->granted) {
+    if ($this->entityAccessChecker->canEdit($entityClass, $user)->granted) {
       $actions[] = PermissionEnum::EDIT;
     }
-    if ($this->entityAccessChecker->canDelete($entityClass, $user, $companyId)->granted) {
+    if ($this->entityAccessChecker->canDelete($entityClass, $user)->granted) {
       $actions[] = PermissionEnum::DELETE;
     }
     return new EntityConfigView(enabled: $config->enabled, label: $config->label, entity: $config->entity, icon: $config->icon, order: $config->order, display: $config->display, actions: $actions, roles: $config->roles, cardinality: $config->cardinality, scope: $config->scope, requireOwnership: $config->requireOwnership, parentEntity: $config->parentEntity, auditable: $config->auditable, revisionable: $config->revisionable);
@@ -251,15 +248,14 @@ class FrontendFormConfig {
    *
    * @return array<int, array<string, bool|string|int|array<string>|null>>
    */
-  public function getAllEntitiesConfig(User $user, int $companyId, string $entityDirectory = __DIR__ . '/../Entity'): array {
+  public function getAllEntitiesConfig(User $user, string $entityDirectory = __DIR__ . '/../Entity'): array {
     // le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('all_entities_config', [
       'key' => $entityDirectory,
-      'user_roles' => $user->getRoles(),
-      'companyId' => $companyId
+      'user_roles' => $user->getRoles()
     ]);
-    return $this->cacheManager->get($cacheKey, function () use ($entityDirectory, $user, $companyId) {
-      return $this->doGetAllEntitiesConfig($entityDirectory, $user, $companyId);
+    return $this->cacheManager->get($cacheKey, function () use ($entityDirectory, $user) {
+      return $this->doGetAllEntitiesConfig($entityDirectory, $user);
     });
   }
 
@@ -268,7 +264,7 @@ class FrontendFormConfig {
    * @param string $entityDirectory
    * @return array<EntityConfigView>
    */
-  private function doGetAllEntitiesConfig(string $entityDirectory, User $user, int $companyId): array {
+  private function doGetAllEntitiesConfig(string $entityDirectory, User $user): array {
     $finder = new \Symfony\Component\Finder\Finder();
     $finder->files()
       ->in($entityDirectory)
@@ -282,7 +278,7 @@ class FrontendFormConfig {
        *
        * @var EntityConfigView|null $config
        */
-      $config = $this->getEntityConfig($className, $user, $companyId);
+      $config = $this->getEntityConfig($className, $user);
       if ($config !== null) {
         if ($config->isEnabled())
           $configs[] = $config;
