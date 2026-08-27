@@ -3,7 +3,7 @@ declare(strict_types = 1);
 namespace Habeuk\HbkSymfony\ViewModel;
 
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
-use Habeuk\HbkSymfony\Enum\ScopeEnum;
+use Habeuk\HbkSymfony\Enum\ScopeEnumInterface;
 
 final readonly class EntityConfigView {
 
@@ -13,9 +13,8 @@ final readonly class EntityConfigView {
    * @param array<PermissionEnum> $actions
    */
   public function __construct(private bool $enabled, private string $label, private string $entity, private ?string $icon, private int $order,
-    private bool $display, private array $actions = [], private array $roles = [], private int $cardinality = - 1,
-    private ScopeEnum $scope = ScopeEnum::PERSONAL, private bool $requireOwnership = true, private ?string $parentEntity = null, private bool $auditable = false,
-    private bool $revisionable = false) {}
+    private bool $display, private array $actions = [], private array $roles = [], private int $cardinality = - 1, private ?ScopeEnumInterface $scope = null,
+    private bool $requireOwnership = true, private ?string $parentEntity = null, private bool $auditable = false, private bool $revisionable = false) {}
 
   public function isEnabled(): bool {
     return $this->enabled;
@@ -61,7 +60,10 @@ final readonly class EntityConfigView {
     return $this->cardinality;
   }
 
-  public function getScope(): ScopeEnum {
+  public function getScope(): ScopeEnumInterface {
+    if ($this->scope === null) {
+      throw new \LogicException('Scope is not set for entity : ' . $this->entity);
+    }
     return $this->scope;
   }
 
@@ -140,6 +142,11 @@ final readonly class EntityConfigView {
    *         }
    */
   public function toArray(): array {
+    if ($this->scope === null) {
+      throw new \LogicException('Scope is not set for entity : ' . $this->entity);
+    }
+    /** @var ScopeEnumInterface $scope*/
+    $scope = $this->scope;
     return [
       'enabled' => $this->enabled,
       'label' => $this->label,
@@ -150,7 +157,7 @@ final readonly class EntityConfigView {
       'roles' => $this->roles,
       'display' => $this->display,
       'cardinality' => $this->cardinality,
-      'scope' => $this->scope->value,
+      'scope' => $scope->getValue(),
       'requireOwnership' => $this->requireOwnership,
       'parentEntity' => $this->parentEntity,
       'auditable' => $this->auditable,
