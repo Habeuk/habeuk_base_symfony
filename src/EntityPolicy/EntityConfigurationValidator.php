@@ -7,7 +7,7 @@ use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
 use App\Contract\BaseEntityInterface;
 use App\Contract\OwnerInterface;
 use App\EntityPolicy\Exception\InvalidEntityConfigurationException;
-use App\Enum\ScopeEnum;
+use Habeuk\HbkSymfony\Enum\ScopeEnumInterface;
 use ReflectionClass;
 
 /**
@@ -17,6 +17,8 @@ use ReflectionClass;
  *
  */
 final readonly class EntityConfigurationValidator {
+
+  function __construct(private readonly ScopeEnumInterface $scopeEnum) {}
 
   /**
    *
@@ -52,17 +54,11 @@ final readonly class EntityConfigurationValidator {
   }
 
   private function validateOwnerRequirement(string $entityClass, EntityConfigView $config): void {
-    $dbg = [
-      '$entityClass' => $entityClass,
-      '$config' => $config
-    ];
-    $filename = str_replace("\\", "--", $entityClass);
-    $requiresOwner = $config->getScope() === ScopeEnum::PERSONAL || $config->requiresOwnership();
+    $requiresOwner = $config->getScope() === $this->scopeEnum->isPersonal() || $config->requiresOwnership();
     if (! $requiresOwner) {
       return;
     }
     if (! is_a($entityClass, OwnerInterface::class, true)) {
-      \Stephane888\Debug\debugLog::symfonyDebug($dbg, 'validateOwnerRequirement---' . $filename, true);
       throw new InvalidEntityConfigurationException(sprintf('L’entité "%s" nécessite OwnerInterface car elle utilise scope PERSONAL ou requireOwnership=true.', $entityClass));
     }
   }
