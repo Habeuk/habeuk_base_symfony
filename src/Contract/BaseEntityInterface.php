@@ -5,8 +5,6 @@ interface BaseEntityInterface {
 
   public function getId(): ?int;
 
-  public function getTitle(): ?string;
-
   public function setTimestampsOnCreate(): void;
 
   public function setTimestampsOnUpdate(): void;
