@@ -2,7 +2,7 @@
 namespace Habeuk\HbkSymfony\Enum;
 
 /**
- * Interface de base pour tous les enums
+ * Interface de base pour tous les enums.
  */
 interface ScopeEnumInterface extends BaseEnumInterface {
 

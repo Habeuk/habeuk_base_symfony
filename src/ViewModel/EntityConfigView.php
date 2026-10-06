@@ -62,6 +62,11 @@ final readonly class EntityConfigView {
 
   public function getScope(): ScopeEnumInterface {
     if ($this->scope === null) {
+      $dbg = [
+        'debug' => debug_backtrace(),
+        'this' => $this
+      ];
+      \Stephane888\Debug\debugLog::symfonyDebug($dbg, 'ScopeEnumInterface', true);
       throw new \LogicException('Scope is not set for entity : ' . $this->entity);
     }
     return $this->scope;
