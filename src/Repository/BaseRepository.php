@@ -6,7 +6,7 @@ use Habeuk\HbkSymfony\Repository\Interfaces\BaseRepositoryInterface;
 use Doctrine\ORM\QueryBuilder;
 use Habeuk\HbkSymfony\Contract\OwnerInterface;
 use Habeuk\HbkSymfony\DTO\Results\CollectionResultsDto;
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 use Habeuk\HbkSymfony\Security\QueryFilter\EntityVisibilityFilter;
 use Habeuk\HbkSymfony\Shared\Doctrine\AbstractBaseEntity;
 use Doctrine\Persistence\ManagerRegistry;
@@ -51,7 +51,7 @@ abstract class BaseRepository extends ServiceEntityRepository implements BaseRep
    * @return object|null
    * @phpstan-return TEntityClass|null
    */
-  public function findWithSecurity(int $id, User $user): ?AbstractBaseEntity {
+  public function findWithSecurity(int $id, BaseUser $user): ?AbstractBaseEntity {
     $alias = $this->alias;
     $qb = $this->initialiseQueryFilter($alias);
     $qb->andWhere(sprintf('%s.id = :entity_identifiant_key', $alias))->setParameter('entity_identifiant_key', $id);
@@ -68,9 +68,9 @@ abstract class BaseRepository extends ServiceEntityRepository implements BaseRep
   /**
    *
    * {@inheritdoc}
-   * @see \App\Repository\Interfaces\BaseRepositoryInterface::loadAll()
+   * @see \Habeuk\HbkSymfony\Repository\Interfaces\BaseRepositoryInterface::loadAll()
    */
-  public function loadAll(int $page, int $limit, User $user, array $filters = []): CollectionResultsDto {
+  public function loadAll(int $page, int $limit, BaseUser $user, array $filters = []): CollectionResultsDto {
     if ($page < 1) {
       $page = 1;
     }
@@ -164,7 +164,7 @@ abstract class BaseRepository extends ServiceEntityRepository implements BaseRep
     }
   }
 
-  public function countByOwner(User $owner): int {
+  public function countByOwner(BaseUser $owner): int {
     $entityClass = $this->getClassName();
     if (! is_a($entityClass, OwnerInterface::class, true)) {
       throw new \LogicException(sprintf('La classe "%s" doit implémenter OwnerInterface pour utiliser countByOwnerWithSecurityFilter().', $entityClass));

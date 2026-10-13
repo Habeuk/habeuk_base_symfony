@@ -3,7 +3,7 @@ namespace Habeuk\HbkSymfony\Contract;
 
 use Habeuk\HbkSymfony\Enum\RoleInterface;
 
-interface UserInterface {
+interface BaseUserInterface {
 
   public function hasRole(RoleInterface $role): bool;
 

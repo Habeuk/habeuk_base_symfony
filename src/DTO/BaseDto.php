@@ -93,6 +93,12 @@ abstract class BaseDto implements BaseDtoInterface {
     else $this->title = $title;
   }
 
+  public function getTitle(): string {
+    if (isset($this->title))
+      return $this->title;
+    return '';
+  }
+
   #[Groups([
     self::ADMIN,
     self::VIEW,

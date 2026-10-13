@@ -2,7 +2,7 @@
 declare(strict_types = 1);
 namespace Habeuk\HbkSymfony\Security\QueryFilter;
 
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Habeuk\HbkSymfony\Security\QueryFilter\Entity\QueryVisibilityFilterInterface;
@@ -20,11 +20,11 @@ final readonly class EntityVisibilityFilter {
    * à ce stade les droits ont deja été verifier et valider.
    *
    * @param QueryBuilder $qb
-   * @param User $user
+   * @param BaseUser $user
    * @param string $entityClass
    * @param string $rootAlias
    */
-  public function apply(QueryBuilder $qb, User $user, string $entityClass, string $rootAlias): void {
+  public function apply(QueryBuilder $qb, BaseUser $user, string $entityClass, string $rootAlias): void {
     foreach ($this->filters as $filter) {
       if ($filter->supports($entityClass)) {
         $filter->apply($qb, $user, $rootAlias, $entityClass);

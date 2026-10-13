@@ -2,7 +2,7 @@
 namespace Habeuk\HbkSymfony\Repository\Interfaces;
 
 use Habeuk\HbkSymfony\DTO\Results\CollectionResultsDto;
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 use Habeuk\HbkSymfony\Shared\Doctrine\AbstractBaseEntity;
 
 /**
@@ -18,9 +18,9 @@ interface BaseRepositoryInterface {
    * @param array<string, mixed> $filters
    * @return CollectionResultsDto<T>
    */
-  public function loadAll(int $page, int $limit, User $user, array $filters = []): CollectionResultsDto;
+  public function loadAll(int $page, int $limit, BaseUser $user, array $filters = []): CollectionResultsDto;
 
-  public function countByOwner(User $user): int;
+  public function countByOwner(BaseUser $user): int;
 
   /**
    * Finds an entity by its id and filters by security.
@@ -28,5 +28,5 @@ interface BaseRepositoryInterface {
    * @return AbstractBaseEntity|null
    * @phpstan-return T|null
    */
-  public function findWithSecurity(int $id, User $user): ?AbstractBaseEntity;
+  public function findWithSecurity(int $id, BaseUser $user): ?AbstractBaseEntity;
 }

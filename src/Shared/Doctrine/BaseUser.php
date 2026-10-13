@@ -11,10 +11,13 @@ use Habeuk\HbkSymfony\Shared\Doctrine\Traits\ {
   StatusTrait,
   UuidTrait
 };
-use Habeuk\HbkSymfony\Contract\StatusEntityInterface;
+use Habeuk\HbkSymfony\Contract\ {
+  StatusEntityInterface,
+  BaseUserInterface
+};
 
-#[ORM\HasLifecycleCallbacks]
-abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterface, UserInterface, PasswordAuthenticatedUserInterface {
+#[ORM\MappedSuperclass]
+abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterface, BaseUserInterface, UserInterface, PasswordAuthenticatedUserInterface {
   use TimestampableTrait;
   use StatusTrait;
   use UuidTrait;
