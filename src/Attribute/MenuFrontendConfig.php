@@ -122,7 +122,7 @@ final class MenuFrontendConfig {
    * @param int $cardinality Nombre maximum d'éléments (-1 = illimité)
    * @param ScopeEnumInterface $scope Portée des données (personal, team, global, restricted)
    * @param array<PermissionEnum> $permissions Actions autorisées (view, create, edit, delete)
-   * @param bool $requireOwnership true = seul le propriétaire peut modifier
+   * @param bool $requireOwnership true = seul le propriétaire peut modifier/supprimer
    * @param string|null $parentEntity Entité parente pour les relations hiérarchiques
    * @param bool $auditable Active la traçabilité des modifications
    * @param bool $revisionable Snapshot complet de l’entité
