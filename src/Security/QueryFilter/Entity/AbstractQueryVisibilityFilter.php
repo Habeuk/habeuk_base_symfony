@@ -6,7 +6,7 @@ use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Doctrine\ORM\EntityManagerInterface;
 use Habeuk\HbkSymfony\Contract\OwnerInterface;
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 
 #[AutoconfigureTag('app.query_visibility_filter')]
 abstract readonly class AbstractQueryVisibilityFilter implements QueryVisibilityFilterInterface {
@@ -22,9 +22,9 @@ abstract readonly class AbstractQueryVisibilityFilter implements QueryVisibility
    * Cette verion par defaut est pour les contenus de Type OwnerInterface.
    *
    * {@inheritdoc}
-   * @see \App\Security\QueryFilter\Entity\QueryVisibilityFilterInterface::apply()
+   * @see \Habeuk\HbkSymfony\Security\QueryFilter\Entity\QueryVisibilityFilterInterface::apply()
    */
-  public function apply(QueryBuilder $qb, User $user, string $rootAlias, string $entityClass): void {
+  public function apply(QueryBuilder $qb, BaseUser $user, string $rootAlias, string $entityClass): void {
     $expressions = [];
     if (is_a($entityClass, OwnerInterface::class, true)) {
       // L'utilisateur courant a créé la ressource.

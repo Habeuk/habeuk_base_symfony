@@ -3,7 +3,7 @@ namespace Habeuk\HbkSymfony\Service;
 
 use Habeuk\HbkSymfony\Attribute\ColumnLabel;
 use Habeuk\HbkSymfony\Attribute\MenuFrontendConfig;
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
 use Habeuk\HbkSymfony\Form\Schema\FormSchemaBuilder;
 use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
@@ -24,11 +24,11 @@ class FrontendFormConfig {
   /**
    *
    * @param class-string $formTypeClass
-   * @param User $user
+   * @param BaseUser $user
    * @param array<string> $groups
    * @return array<mixed>
    */
-  public function getFormFields(string $formTypeClass, User $user, array $groups): array {
+  public function getFormFields(string $formTypeClass, BaseUser $user, array $groups): array {
     $cacheKey = $this->cacheManager->key('entity_form_fields', [
       'key' => $formTypeClass,
       'user_roles' => $user->getRoles(),
@@ -47,11 +47,11 @@ class FrontendFormConfig {
   /**
    *
    * @param class-string $formTypeClass
-   * @param User $user
+   * @param BaseUser $user
    * @param array<string> $groups
    * @return array<mixed>
    */
-  public function doGetFormFields(string $formTypeClass, User $user, array $groups): ?array {
+  public function doGetFormFields(string $formTypeClass, BaseUser $user, array $groups): ?array {
     PermissionEnum::validatedEnums($groups);
     $formTypeClass = EntityClassHelper::assertFormType($formTypeClass);
     $entityClass = EntityClassHelper::getEntityClassFromFormType($formTypeClass);
@@ -87,7 +87,7 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<string, array<string,int|string|null>>
    */
-  public function getColumnLabels(string $dtoClass, User $user, array $groups): array {
+  public function getColumnLabels(string $dtoClass, BaseUser $user, array $groups): array {
     // Le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('column_labels', [
       'key' => $dtoClass,
@@ -105,7 +105,7 @@ class FrontendFormConfig {
    * @param array<string> $groups
    * @return array<mixed>
    */
-  private function doGetColumnLabels(string $dtoClass, User $user, array $groups): array {
+  private function doGetColumnLabels(string $dtoClass, BaseUser $user, array $groups): array {
     PermissionEnum::validatedEnums($groups);
     $entityClass = EntityClassHelper::getEntityClassFromDto($dtoClass);
     $labels = [];
@@ -175,10 +175,10 @@ class FrontendFormConfig {
    * Extrait automatiquement tous les enums présents dans le DTO
    *
    * @param class-string $dtoClass
-   * @param User $user
+   * @param BaseUser $user
    * @return array<mixed>
    */
-  public function extractEnumsFromDto(string $dtoClass, User $user): array {
+  public function extractEnumsFromDto(string $dtoClass, BaseUser $user): array {
     $cacheKey = $this->cacheManager->key('all_enum_from_dto', [
       'key' => $dtoClass,
       'user_roles' => $user->getRoles()
@@ -196,7 +196,7 @@ class FrontendFormConfig {
    * @param class-string $entityClass
    * @return EntityConfigView|null
    */
-  public function getEntityConfig(string $entityClass, User $user): EntityConfigView|null {
+  public function getEntityConfig(string $entityClass, BaseUser $user): EntityConfigView|null {
     // Le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('entity_config', [
       'key' => $entityClass,
@@ -218,7 +218,7 @@ class FrontendFormConfig {
    *
    * @param class-string $entityClass
    */
-  private function doGetEntityConfig(string $entityClass, User $user): ?EntityConfigView {
+  private function doGetEntityConfig(string $entityClass, BaseUser $user): ?EntityConfigView {
     $config = self::getConfig($entityClass);
     if ($config === null) {
       return null;
@@ -248,7 +248,7 @@ class FrontendFormConfig {
    *
    * @return array<int, array<string, bool|string|int|array<string>|null>>
    */
-  public function getAllEntitiesConfig(User $user, string $entityDirectory = __DIR__ . '/../Entity'): array {
+  public function getAllEntitiesConfig(BaseUser $user, string $entityDirectory = __DIR__ . '/../Entity'): array {
     // le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('all_entities_config', [
       'key' => $entityDirectory,
@@ -264,7 +264,7 @@ class FrontendFormConfig {
    * @param string $entityDirectory
    * @return array<EntityConfigView>
    */
-  private function doGetAllEntitiesConfig(string $entityDirectory, User $user): array {
+  private function doGetAllEntitiesConfig(string $entityDirectory, BaseUser $user): array {
     $finder = new \Symfony\Component\Finder\Finder();
     $finder->files()
       ->in($entityDirectory)
