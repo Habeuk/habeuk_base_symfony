@@ -2,7 +2,7 @@
 namespace App\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\WebpackEncoreBundle\Asset\EntrypointLookupInterface;
+use Symfony\Reprise\Asset\EntrypointsLookupInterface; // ← Modifié
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -57,7 +57,7 @@ class SendMails {
   /**
    *
    * @param MailerInterface $mailer
-   * @param EntrypointLookupInterface $entrypointLookup
+   * @param EntrypointsLookupInterface $entrypointsLookup
    * @param Environment $twig
    * @param LoggerInterface $logger
    * @param EmailValidator $emailValidator
@@ -65,7 +65,7 @@ class SendMails {
    * @param string $projectDir
    * @param RateLimiterFactory|null $emailRateLimiter
    */
-  public function __construct(private readonly MailerInterface $mailer, private readonly EntrypointLookupInterface $entrypointLookup,
+  public function __construct(private readonly MailerInterface $mailer, private readonly EntrypointsLookupInterface $entrypointsLookup,
     private readonly Environment $twig, LoggerInterface $logger, private readonly EmailValidator $emailValidator,
     #[Autowire(param: 'email_notification')] private readonly array $notification, #[Autowire(param: 'kernel.project_dir')] private readonly string $projectDir,
     ?RateLimiterFactory $emailRateLimiter = null) {
@@ -291,11 +291,12 @@ class SendMails {
 
   public function getStyle(): string {
     if ($this->styles === '') {
-      /** @var \Symfony\WebpackEncoreBundle\Asset\EntrypointLookup $entrypointLookup */
-      $entrypointLookup = $this->entrypointLookup;
-      $entrypointLookup->reset();
+      /** @var \Symfony\Reprise\Asset\EntrypointsLookup $entrypointsLookup */
+      // ← Modifié
+      $entrypointsLookup = $this->entrypointsLookup;
+      $entrypointsLookup->reset();
 
-      $cssFiles = $entrypointLookup->getCssFiles('mailer');
+      $cssFiles = $entrypointsLookup->getCssFiles('mailer');
       $cssContent = '';
 
       foreach ($cssFiles as $file) {

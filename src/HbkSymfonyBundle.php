@@ -26,7 +26,7 @@ final class HbkSymfonyBundle extends AbstractBundle {
 
   /**
    *
-   * @param array{role_class: class-string<RoleInterface>} $config
+   * @param array<mixed> $config
    */
   public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void {
     $container->parameters()->set('hbk_symfony.role_class', $config['role_class']);
