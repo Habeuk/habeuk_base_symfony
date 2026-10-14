@@ -1,0 +1,17 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # Chargement auto de tous les services du bundle
+    Habeuk\HbkSymfony\:
+        resource: '../src/'
+        exclude: '../src/{HbkSymfonyBundle.php,Enum,Entity,DependencyInjection}'
+
+    # Pool de cache dont CacheManager a besoin
+    app.data_cache_filesystem:
+        parent: cache.adapter.filesystem
+        tags:
+            - name: cache.pool
+              namespace: 'hbk_symfony'
+              default_lifetime: 86400

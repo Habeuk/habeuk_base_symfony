@@ -12,11 +12,16 @@ use Habeuk\HbkSymfony\Enum\PermissionEnum;
 use Habeuk\HbkSymfony\Enum\RoleInterface;
 use Habeuk\HbkSymfony\Repository\BaseRepository;
 use Habeuk\HbkSymfony\ViewModel\EntityConfigView;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerInterface {
 
-  public function __construct(private EntityConfigProvider $entityConfigProvider, private readonly EntityConfigurationValidator $configurationValidator,
-    private readonly EntityManagerInterface $entityManager, private readonly RoleInterface $userRole) {}
+  /**
+   *
+   * @param class-string<RoleInterface> $roleClass
+   */
+  public function __construct(private EntityConfigProvider $entityConfigProvider, private EntityConfigurationValidator $configurationValidator,
+    private EntityManagerInterface $entityManager, #[Autowire('%hbk_symfony.role_class%')] private string $roleClass) {}
 
   /**
    *
@@ -263,9 +268,9 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    */
   private function userHasCompatibleRole(array $userRoles, array $requiredRoles): bool {
     /** @var array<\Habeuk\HbkSymfony\Enum\RoleInterface> $entityAccessRoles */
-    $entityAccessRoles = $this->userRole::createFromValues($requiredRoles);
+    $entityAccessRoles = $this->roleClass::createFromValues($requiredRoles);
     foreach ($userRoles as $userRole) {
-      $userAllRoles = $this->userRole::createFromValue($userRole)->inherits();
+      $userAllRoles = $this->roleClass::createFromValue($userRole)->inherits();
       foreach ($userAllRoles as $role) {
         if (in_array($role, $entityAccessRoles, true)) {
           return true;
