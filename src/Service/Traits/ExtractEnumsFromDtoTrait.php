@@ -74,7 +74,7 @@ trait ExtractEnumsFromDtoTrait {
   private function normalizeEnum(string $enumClass): array {
     $cases = [];
     foreach ($enumClass::cases() as $case) {
-      if ($case instanceof \App\Enum\BaseEnumInterface) {
+      if ($case instanceof \Habeuk\HbkSymfony\Enum\BaseEnumInterface) {
         $value = $case->getValue();
         $caseData = [
           'value' => $value,

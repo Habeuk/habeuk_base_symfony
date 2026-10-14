@@ -18,7 +18,7 @@ abstract class RecordsEvents implements RecordsEventsInterface {
   /**
    *
    * {@inheritdoc}
-   * @see \App\Contract\RecordsEventsInterface::pullDomainEvents()
+   * @see \Habeuk\HbkSymfony\Contract\RecordsEventsInterface::pullDomainEvents()
    * @return array<object>
    */
   public function pullDomainEvents(): array {

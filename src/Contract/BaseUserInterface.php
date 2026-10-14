@@ -7,6 +7,12 @@ interface BaseUserInterface {
 
   public function hasRole(RoleInterface $role): bool;
 
+  public function isModerator(): bool;
+
+  public function isAdmin(): bool;
+
+  public function isSuperAdmin(): bool;
+
   public function retriveRoleEnum(string $role): RoleInterface;
 
   /**

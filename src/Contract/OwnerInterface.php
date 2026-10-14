@@ -1,15 +1,15 @@
 <?php
 namespace Habeuk\HbkSymfony\Contract;
 
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 
 interface OwnerInterface {
 
-  public function getOwner(): ?User;
+  public function getOwner(): ?BaseUser;
 
-  public function setOwner(User $user): self;
+  public function setOwner(BaseUser $user): self;
 
-  public function isOwner(User $user): bool;
+  public function isOwner(BaseUser $user): bool;
 
   public function ownerIsDefinie(): bool;
 }

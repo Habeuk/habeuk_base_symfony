@@ -13,8 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\ {
 use Symfony\Component\Intl\Countries;
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
 use Habeuk\HbkSymfony\Utils\EntityClassHelper;
-use App\Form\Type\EntityCollectionType;
-use App\Form\Type\ {
+use Habeuk\HbkSymfony\Form\Type\EntityCollectionType;
+use Habeuk\HbkSymfony\Form\Type\ {
   EntitySelectType,
   TreeType
 };

@@ -5,7 +5,7 @@ namespace Habeuk\HbkSymfony\EntityPolicy;
 use Habeuk\HbkSymfony\Contract\BaseEntityInterface;
 use Habeuk\HbkSymfony\Contract\OwnerInterface;
 use Habeuk\HbkSymfony\DTO\Security\AccessCheckResult;
-use App\Entity\User;
+use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 use Habeuk\HbkSymfony\EntityPolicy\Contract\EntityAccessCheckerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Habeuk\HbkSymfony\Enum\PermissionEnum;
@@ -23,7 +23,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    * {@inheritdoc}
    * @see \Habeuk\HbkSymfony\EntityPolicy\Contract\EntityAccessCheckerInterface::check()
    */
-  public function check(object|string $entity, User $user, PermissionEnum $action): AccessCheckResult {
+  public function check(object|string $entity, BaseUser $user, PermissionEnum $action): AccessCheckResult {
     $entityClass = $this->resolveEntityClass($entity);
     $accessEntityDefinition = $this->checkEntityDefinition($entityClass, $user, $action);
     if (! $accessEntityDefinition->granted) {
@@ -43,7 +43,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    * {@inheritdoc}
    * @see \Habeuk\HbkSymfony\EntityPolicy\Contract\EntityAccessCheckerInterface::checkEntityDefinition()
    */
-  public function checkEntityDefinition(string $entityClass, User $user, PermissionEnum $action): AccessCheckResult {
+  public function checkEntityDefinition(string $entityClass, BaseUser $user, PermissionEnum $action): AccessCheckResult {
     $entityConfig = $this->entityConfigProvider->get($entityClass);
     if ($entityConfig === null) {
       return AccessCheckResult::denied('Cette ressource n’est pas disponible.');
@@ -73,7 +73,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    * {@inheritdoc}
    * @see \Habeuk\HbkSymfony\EntityPolicy\Contract\EntityAccessCheckerInterface::checkEntityData()
    */
-  public function checkEntityData(object $entity, User $user, PermissionEnum $action): AccessCheckResult {
+  public function checkEntityData(object $entity, BaseUser $user, PermissionEnum $action): AccessCheckResult {
     $entityClass = $this->resolveEntityClass($entity);
     $entityConfig = $this->entityConfigProvider->get($entityClass);
     if ($entityConfig === null) {
@@ -94,7 +94,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
     return AccessCheckResult::granted();
   }
 
-  private function checkScope(object|string $entity, EntityConfigView $entityConfig, User $user, PermissionEnum $action): ?AccessCheckResult {
+  private function checkScope(object|string $entity, EntityConfigView $entityConfig, BaseUser $user, PermissionEnum $action): ?AccessCheckResult {
     if (is_string($entity))
       return null;
     if ($entity instanceof BaseEntityInterface) {
@@ -113,7 +113,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
     return AccessCheckResult::denied("Aucun scope n'est definie");
   }
 
-  private function checkPersonalScope(object $entityInstance, User $user): ?AccessCheckResult {
+  private function checkPersonalScope(object $entityInstance, BaseUser $user): ?AccessCheckResult {
     return $this->checkOwnership($entityInstance, $user);
   }
 
@@ -173,7 +173,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    * Même lorsque requireOwnership=true, tous les utilisateurs
    * peuvent consulter la ressource.
    */
-  private function checkGlobalScope(object $entityInstance, EntityConfigView $entityConfig, User $user, PermissionEnum $action): ?AccessCheckResult {
+  private function checkGlobalScope(object $entityInstance, EntityConfigView $entityConfig, BaseUser $user, PermissionEnum $action): ?AccessCheckResult {
     if (! $this->actionRequiresOwnership($action, $entityConfig)) {
       return null;
     }
@@ -199,7 +199,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
     ], true);
   }
 
-  private function checkOwnership(object $entityInstance, User $user): ?AccessCheckResult {
+  private function checkOwnership(object $entityInstance, BaseUser $user): ?AccessCheckResult {
     /** @var OwnerInterface $entityInstance */
     if ($entityInstance->isOwner($user)) {
       return null;
@@ -211,7 +211,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    *
    * @param class-string $entityClass
    */
-  private function checkCardinality(string $entityClass, EntityConfigView $entityConfig, User $user, PermissionEnum $action): ?AccessCheckResult {
+  private function checkCardinality(string $entityClass, EntityConfigView $entityConfig, BaseUser $user, PermissionEnum $action): ?AccessCheckResult {
     if ($action !== PermissionEnum::CREATE) {
       return null;
     }
@@ -230,7 +230,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
    *
    * @param class-string $entityClass
    */
-  private function countUserEntities(string $entityClass, User $user): int {
+  private function countUserEntities(string $entityClass, BaseUser $user): int {
     $repository = $this->entityManager->getRepository($entityClass);
     if (! ($repository instanceof BaseRepository)) {
       throw new \ErrorException("Erreur de configuration");
@@ -245,7 +245,7 @@ abstract readonly class BaseEntityAccessChecker implements EntityAccessCheckerIn
     return AccessCheckResult::denied('Cette action n’est pas autorisée sur cette ressource.');
   }
 
-  private function checkRoles(EntityConfigView $entityConfig, User $user): ?AccessCheckResult {
+  private function checkRoles(EntityConfigView $entityConfig, BaseUser $user): ?AccessCheckResult {
     $requiredRoles = $entityConfig->getRoles();
     if ($requiredRoles === []) {
       return AccessCheckResult::denied('Aucun rôle n’est autorisé pour cette ressource.');

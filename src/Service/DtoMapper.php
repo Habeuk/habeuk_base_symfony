@@ -7,7 +7,6 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -223,15 +222,7 @@ class DtoMapper {
      * On les retire à nouveau et on recupere exclussiment les champs autorisé à l'edition.
      */
     $data = $this->normalizer->normalize($dto, null, $context);
-    if ($dto instanceof \App\DTO\QuoteLineDto)
-      \Stephane888\Debug\debugLog::symfonyDebug([
-        '$dto' => $dto,
-        '$data' => $data,
-        '$groups' => $groups
-      ], 'afterNormalise', true);
     $entity = $this->deNormalizer->denormalize($data, get_class($existingEntity), null, $context);
-    if ($dto instanceof \App\DTO\QuoteLineDto)
-      \Stephane888\Debug\debugLog::symfonyDebug($entity, 'afterMergeEntity', true);
     return $entity;
   }
 
