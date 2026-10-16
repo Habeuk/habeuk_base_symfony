@@ -1,5 +1,5 @@
 <?php
-namespace App\Service;
+namespace Habeuk\HbkSymfony\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Reprise\Asset\EntrypointsLookupInterface; // ← Modifié
