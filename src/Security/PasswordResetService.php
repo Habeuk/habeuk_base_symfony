@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
-use App\Service\SendMails;
+use Habeuk\HbkSymfony\Service\SendMails;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Webmozart\Assert\Assert;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;

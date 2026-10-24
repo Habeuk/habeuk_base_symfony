@@ -1,3 +1,4 @@
+# vendor/habeuk/habeuk_base_symfony/config/services.yaml
 services:
     _defaults:
         autowire: true
@@ -7,6 +8,10 @@ services:
     Habeuk\HbkSymfony\:
         resource: '../src/'
         exclude: '../src/{HbkSymfonyBundle.php,Enum,Entity,DependencyInjection}'
+
+    # Déclaration du service tiers utilisé par SendMails
+    Egulias\EmailValidator\EmailValidator:
+        # Aucune dépendance obligatoire dans le constructeur
 
     # Pool de cache dont CacheManager a besoin
     app.data_cache_filesystem:

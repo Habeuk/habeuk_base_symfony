@@ -1,0 +1,12 @@
+{
+    "bundles": {
+        "Habeuk\\HbkSymfony\\HbkSymfonyBundle": ["all"]
+    },
+    "copy-from-recipe": {
+        "config/": "%CONFIG_DIR%/"
+    },
+    "env": {
+        "NOTIFICATION_EMAIL_VALUE": "no-reply@example.com",
+        "NOTIFICATION_EMAIL_NAME": "Mon Application"
+    }
+}
