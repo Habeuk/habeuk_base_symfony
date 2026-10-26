@@ -13,14 +13,16 @@ use Habeuk\HbkSymfony\Service\Traits\ExtractEnumsFromDtoTrait;
 use Habeuk\HbkSymfony\EntityPolicy\EntityAccessChecker;
 use Habeuk\HbkSymfony\EntityPolicy\EntityConfigProvider;
 use Habeuk\HbkSymfony\Service\Traits\ExtractColumnLabel;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class FrontendFormConfig {
   use ExtractEnumsFromDtoTrait;
   use ExtractColumnLabel;
-
+  
   public function __construct(private readonly CacheManager $cacheManager, private readonly EntityAccessChecker $entityAccessChecker,
-    private readonly FormSchemaBuilder $formSchemaBuilder, private readonly DtoMapper $dtoMapper, private readonly EntityTypeResolverService $entityTypeResolver) {}
-
+    private readonly FormSchemaBuilder $formSchemaBuilder, private readonly DtoMapper $dtoMapper, private readonly EntityTypeResolverService $entityTypeResolver,
+    #[Autowire('%kernel.project_dir%')] private readonly string $projectDir) {}
+  
   /**
    *
    * @param class-string $formTypeClass
@@ -43,7 +45,7 @@ class FrontendFormConfig {
       throw new \ErrorException(sprintf("Vous n'avez pas les droits suffisants pour afficher le formulaire de : %s (groupe: %s)", $formTypeClass, $group));
     else throw new \ErrorException("Vous n'avez pas les droits suffisants pour afficher le formulaire.");
   }
-
+  
   /**
    *
    * @param class-string $formTypeClass
@@ -62,7 +64,7 @@ class FrontendFormConfig {
     if (! ($canCreate->granted || $canEdit->granted)) {
       return null;
     }
-
+    
     // On cree une entite par defaut ( permettant de valider la concordance du formulaire avec le Dto ).
     $entityDtoClass = EntityClassHelper::getDtoClassFromFormType($formTypeClass);
     if ($entityDtoClass === null)
@@ -79,7 +81,7 @@ class FrontendFormConfig {
     $fields = $this->formSchemaBuilder->buildSchema($formTypeClass, $entityDto, $groups, $availablesFields, $formOptions);
     return $fields;
   }
-
+  
   /**
    * Recupere les noms des proprietes en function du groupe.
    *
@@ -98,7 +100,7 @@ class FrontendFormConfig {
       return $this->doGetColumnLabels($dtoClass, $user, $groups);
     });
   }
-
+  
   /**
    *
    * @param class-string $dtoClass
@@ -135,7 +137,7 @@ class FrontendFormConfig {
     uasort($labels, fn ($a, $b) => $a['order'] <=> $b['order']);
     return $labels;
   }
-
+  
   /**
    * Extrait les infos d'une méthode (getter)
    *
@@ -146,20 +148,20 @@ class FrontendFormConfig {
   private function extractColumnLabelFromMethod(\ReflectionMethod $method, array $groups, array &$labels): void {
     $attributes = $method->getAttributes(ColumnLabel::class);
     $groupsAttributes = $method->getAttributes(Groups::class);
-
+    
     if ($attributes === [] || $groupsAttributes === []) {
       return;
     }
-
+    
     /** @var Groups $groupProperty */
     $groupProperty = $groupsAttributes[0]->newInstance();
     if (array_intersect($groups, $groupProperty->groups) === []) {
       return;
     }
-
+    
     /** @var ColumnLabel $columnLabel */
     $columnLabel = $attributes[0]->newInstance();
-
+    
     $propertyName = EntityClassHelper::normalizeMethodName($method->getName());
     $labels[$propertyName] = [
       'label' => $columnLabel->label,
@@ -170,7 +172,7 @@ class FrontendFormConfig {
       'display' => $columnLabel->display
     ];
   }
-
+  
   /**
    * Extrait automatiquement tous les enums présents dans le DTO
    *
@@ -187,7 +189,7 @@ class FrontendFormConfig {
       return $this->doExtractEnumsFromDto($dtoClass);
     });
   }
-
+  
   /**
    * Recuperer les informations pour l'affichage de l'entite comme lien dans le B.O.
    * NB: Si un role est definie au niveau de l'entité alors tous les utilisateurs ayant
@@ -206,14 +208,14 @@ class FrontendFormConfig {
       return $this->doGetEntityConfig($entityClass, $user);
     });
   }
-
+  
   /**
    * Récupère la configuration de l'entité
    */
   public static function getConfig(object|string $entity): ?MenuFrontendConfig {
     return EntityConfigProvider::getConfig($entity);
   }
-
+  
   /**
    *
    * @param class-string $entityClass
@@ -240,7 +242,7 @@ class FrontendFormConfig {
     }
     return new EntityConfigView(enabled: $config->enabled, label: $config->label, entity: $config->entity, icon: $config->icon, order: $config->order, display: $config->display, actions: $actions, roles: $config->roles, cardinality: $config->cardinality, scope: $config->scope, requireOwnership: $config->requireOwnership, parentEntity: $config->parentEntity, auditable: $config->auditable, revisionable: $config->revisionable);
   }
-
+  
   /**
    * Recuperer tous les entities qui doivent s'afficher dans le BO.
    * NB: Si un role est definie au niveau de l'entité alors tous les utilisateurs ayant
@@ -248,7 +250,8 @@ class FrontendFormConfig {
    *
    * @return array<int, array<string, bool|string|int|array<string>|null>>
    */
-  public function getAllEntitiesConfig(BaseUser $user, string $entityDirectory = __DIR__ . '/../Entity'): array {
+  public function getAllEntitiesConfig(BaseUser $user, string $entityDirectory = '/src/Entity'): array {
+    $entityDirectory = $this->projectDir . $entityDirectory;
     // le cache c'est en fonction des roles.
     $cacheKey = $this->cacheManager->key('all_entities_config', [
       'key' => $entityDirectory,
@@ -258,7 +261,7 @@ class FrontendFormConfig {
       return $this->doGetAllEntitiesConfig($entityDirectory, $user);
     });
   }
-
+  
   /**
    *
    * @param string $entityDirectory
@@ -269,7 +272,7 @@ class FrontendFormConfig {
     $finder->files()
       ->in($entityDirectory)
       ->name('*.php');
-
+    
     $configs = [];
     foreach ($finder as $file) {
       /** @var class-string $className */

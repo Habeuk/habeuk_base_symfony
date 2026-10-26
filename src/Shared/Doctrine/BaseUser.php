@@ -6,11 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Habeuk\HbkSymfony\Shared\Doctrine\Traits\ {
-  TimestampableTrait,
-  StatusTrait,
-  UuidTrait
-};
 use Habeuk\HbkSymfony\Contract\ {
   StatusEntityInterface,
   BaseUserInterface
@@ -18,9 +13,7 @@ use Habeuk\HbkSymfony\Contract\ {
 
 #[ORM\MappedSuperclass]
 abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterface, BaseUserInterface, UserInterface, PasswordAuthenticatedUserInterface {
-  use TimestampableTrait;
-  use StatusTrait;
-  use UuidTrait;
+
 
   #[ORM\Column(length: 180)]
   #[Assert\NotBlank]
@@ -41,7 +34,7 @@ abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterf
   }
 
   #[ORM\Column]
-  private bool $isVerified = false;
+  protected bool $isVerified = false;
 
   // === Informations personnelles ===
   #[ORM\Column(length: 100, nullable: true)]
