@@ -7,11 +7,11 @@ use Doctrine\ORM\QueryBuilder;
 use Habeuk\HbkSymfony\Shared\Doctrine\BaseUser;
 
 final readonly class UserVisibilityFilter extends AbstractQueryVisibilityFilter {
-
+  
   public function supports(string $entityClass): bool {
-    return $entityClass === BaseUser::class;
+    return is_a($entityClass, BaseUser::class, true);
   }
-
+  
   public function apply(QueryBuilder $qb, BaseUser $user, string $rootAlias, string $entityClass): void {
     if (! $user->isSuperAdmin()) {
       $qb->andWhere("$rootAlias.id = :user_id")->setParameter('user_id', $user->getId());
