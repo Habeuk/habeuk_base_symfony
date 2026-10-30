@@ -22,13 +22,13 @@ use Habeuk\HbkSymfony\EntityPolicy\EntityAccessChecker;
 
 abstract class BaseApiCrud extends BaseApi {
   use BaseApiTrait;
-  
+
   function __construct(protected readonly EntityManagerInterface $entityManager, protected readonly FrontendFormConfig $frontendFormConfig,
     protected readonly EntityReferenceResolver $entityResolver, protected readonly ApiDatasMapper $apiDatasMapper,
     protected readonly EntityAccessChecker $entityAccessChecker, LoggerInterface $logger) {
     parent::__construct($logger);
   }
-  
+
   /**
    *
    * @param User $user
@@ -65,9 +65,10 @@ abstract class BaseApiCrud extends BaseApi {
         'enums' => $this->frontendFormConfig->extractEnumsFromDto($this->entityDtoClass, $user)
       ];
     }
-    throw new \Exception("Une erreur s'est produite");
+    //
+    throw new \Exception("Une erreur s'est produite: Entity/Dto/form non résolus. les valeurs : " . implode(', ', ['entityClass:'. $this->entityClass, 'entityDtoClass:'. $this->entityDtoClass, 'formTypeClass:'. $this->formTypeClass]));
   }
-  
+
   /**
    *
    * @param string $action
@@ -82,7 +83,7 @@ abstract class BaseApiCrud extends BaseApi {
       if ($user->isAdmin()) {
         $groups[] = BaseDto::ADMIN;
       }
-      
+
       $fields = $this->frontendFormConfig->getFormFields($this->formTypeClass, $user, $groups);
       $emptyEntity = new $this->entityDtoClass();
       return [
@@ -90,9 +91,9 @@ abstract class BaseApiCrud extends BaseApi {
         'formData' => $this->loadContentArray($emptyEntity, $this->entityDtoClass, true)
       ];
     }
-    throw new \Exception("Une erreur s'est produite");
+    throw new \Exception("Une erreur s'est produite : Entity/Dto/form non résolus. les valeurs : " . implode(', ', ['entityClass:'. $this->entityClass, 'entityDtoClass:'. $this->entityDtoClass, 'formTypeClass:'. $this->formTypeClass]));
   }
-  
+
   /**
    * Sauvegarde en masse d'entités du même type.
    *
@@ -113,7 +114,7 @@ abstract class BaseApiCrud extends BaseApi {
     if ($this->entityClass === null || $this->entityDtoClass === null) {
       throw new \LogicException('Entity/Dto non résolus.');
     }
-    
+
     $data = json_decode($request->getContent(), true);
     $items = $data['items'] ?? $data;
     if (! is_array($items) || $items === []) {
@@ -121,7 +122,7 @@ abstract class BaseApiCrud extends BaseApi {
         'error' => 'Aucune donnée à sauvegarder'
       ], Response::HTTP_BAD_REQUEST);
     }
-    
+
     try {
       /** @var list<object> $savedEntities */
       $savedEntities = $this->entityManager->wrapInTransaction(function () use ($entityType, $items, $user): array {
@@ -134,7 +135,7 @@ abstract class BaseApiCrud extends BaseApi {
         }
         return $results;
       });
-      
+
       return $this->json(array_map(fn (object $entity): array => $this->loadContentArray($entity, $this->entityDtoClass), $savedEntities));
     }
     catch (ValidationFailedException $e) {
@@ -147,7 +148,7 @@ abstract class BaseApiCrud extends BaseApi {
       return $this->error($e, $user, "Une erreur s'est produite lors de la sauvegarde en masse");
     }
   }
-  
+
   /**
    * Sauvegarde une seule entité à partir d'un payload brut.
    * Retourne l'entité persistée.
@@ -195,7 +196,7 @@ abstract class BaseApiCrud extends BaseApi {
       /** @var BaseDto $prepareEntity */
       $prepareEntity = $this->apiDatasMapper->fromDtoToNewEntity($dto, $entityClass);
       $this->entityResolver->resolve($dto, $prepareEntity, $data);
-      
+
       if ($prepareEntity instanceof OwnerInterface) {
         $prepareEntity->setOwner($user);
       }
@@ -205,7 +206,7 @@ abstract class BaseApiCrud extends BaseApi {
       if (! $accessData->granted) {
         throw new \RuntimeException($accessData->message);
       }
-      
+
       $this->entityManager->persist($entity);
       $this->performEntity($entity);
     }
@@ -223,19 +224,19 @@ abstract class BaseApiCrud extends BaseApi {
         $entity->setOwner($user);
       }
       //
-      
+
       $accessData = $this->entityAccessChecker->checkEntityData($entity, $user, PermissionEnum::EDIT);
       if (! $accessData->granted) {
         throw new \RuntimeException($accessData->message);
       }
-      
+
       // On applique des logiques metiers.
       $this->performEntity($entity, $entityOld);
     }
-    
+
     return $entity;
   }
-  
+
   /**
    *
    * @param string $entityType
@@ -252,10 +253,10 @@ abstract class BaseApiCrud extends BaseApi {
     if ($this->entityClass === null || $this->entityDtoClass === null) {
       throw new \LogicException('Entity/Dto non résolus.');
     }
-    
+
     $data = json_decode($request->getContent(), true);
     $messageError = ($data['id'] ?? null) !== null ? "Une erreur s'est produite lors de mise à jour de votre contenu" : "Une erreur s'est produite lors de la mise à jour de votre contenu";
-    
+
     try {
       $entity = $this->saveOneEntity($entityType, $data, $user);
       return $this->json($this->loadContentArray($entity, $this->entityDtoClass));
@@ -270,7 +271,7 @@ abstract class BaseApiCrud extends BaseApi {
       return $this->error($e, $user, $messageError);
     }
   }
-  
+
   /**
    *
    * @param object $entity ( la nouvelle entité)

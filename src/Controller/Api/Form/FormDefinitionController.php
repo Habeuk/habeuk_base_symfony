@@ -2,7 +2,6 @@
 namespace Habeuk\HbkSymfony\Controller\Api\Form;
 
 use App\Entity\User;
-
 use Habeuk\HbkSymfony\Controller\Api\BaseApiCrud;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -14,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[IsGranted('ROLE_USER')]
 #[Route('/api/form')]
 final class FormDefinitionController extends BaseApiCrud {
-
+  
   /**
    * Recuperer les entites qui peuvent etre gerer de maniere dynamique.
    */
@@ -30,7 +29,7 @@ final class FormDefinitionController extends BaseApiCrud {
     }
     return $this->json($forms);
   }
-
+  
   /**
    * Recupere les champs pour l'affichage du tableau et aussi les configs de l'entité.
    */
@@ -43,10 +42,15 @@ final class FormDefinitionController extends BaseApiCrud {
         'error' => 'Entity/Form not found : ' . $entityName
       ], Response::HTTP_UNAUTHORIZED);
     }
-    $reults = $this->baseEntityDefinition($user);
+    try {
+      $reults = $this->baseEntityDefinition($user);
+    }
+    catch (\Throwable $e) {
+      return $this->error($e, $user);
+    }
     return $this->json($reults);
   }
-
+  
   /**
    * Recupere le formulaire d'une entité en JSON.
    */
@@ -59,7 +63,12 @@ final class FormDefinitionController extends BaseApiCrud {
         'error' => 'Entity/Form not found : ' . $entityName
       ], Response::HTTP_UNAUTHORIZED);
     }
-    $datas = $this->baseFormEntityDefinition($action, $user);
+    try {
+      $datas = $this->baseFormEntityDefinition($action, $user);
+    }
+    catch (\Throwable $e) {
+      return $this->error($e, $user);
+    }
     return $this->json($datas);
   }
 }

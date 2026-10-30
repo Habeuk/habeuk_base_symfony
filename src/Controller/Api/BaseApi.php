@@ -11,33 +11,33 @@ use Symfony\Component\HttpFoundation\Response;
 use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 
 abstract class BaseApi extends AbstractController {
-
+  
   /**
    * Le chemin vers l'entite Dto.
    *
    * @var class-string|null
    */
   protected ?string $entityDtoClass = null;
-
+  
   /**
    * Le chemin vers l'entite doctrine.
    *
    * @var class-string|null
    */
   protected ?string $entityClass = null;
-
+  
   /**
    *
    * @var class-string|null
    */
   protected ?string $formTypeClass = null;
-
+  
   protected readonly LoggerInterface $logger;
-
+  
   function __construct(LoggerInterface $appLogger) {
     $this->logger = $appLogger;
   }
-
+  
   protected function error(\Throwable $e, BaseUser $user, ?string $publicMessage = null, int $code = Response::HTTP_INTERNAL_SERVER_ERROR): JsonResponse {
     $this->logger->debug($e->getMessage() . "\n details : {dbg}", [
       'dbg' => $e
@@ -87,7 +87,7 @@ abstract class BaseApi extends AbstractController {
       'error' => $message
     ], $code);
   }
-
+  
   /**
    * Verifie que le code est ok.
    *
@@ -108,7 +108,7 @@ abstract class BaseApi extends AbstractController {
     // Peut etre null si l'entité n'autorise pas l'edition.
     /** @var class-string $formTypeClass */
     $this->formTypeClass = class_exists($formTypeClass) ? $formTypeClass : null;
-
+    
     return true;
   }
 }
