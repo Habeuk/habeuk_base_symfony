@@ -16,7 +16,7 @@ trait OwnerTrait {
   private ?BaseUser $owner = null;
   
   /**
-   * Contient les données exposes aux fronts sans pour autant comprometre la bd.
+   * Contient les données exposes aux fronts sans pour autant comprometre la BD.
    */
   private ?BaseUser $ownerData = null;
   

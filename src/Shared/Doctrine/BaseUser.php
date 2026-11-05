@@ -10,11 +10,12 @@ use Habeuk\HbkSymfony\Contract\ {
   StatusEntityInterface,
   BaseUserInterface
 };
+use Habeuk\HbkSymfony\Shared\Doctrine\Traits\TimestampableTrait;
 
 #[ORM\MappedSuperclass]
 abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterface, BaseUserInterface, UserInterface, PasswordAuthenticatedUserInterface {
-
-
+  use TimestampableTrait;
+  
   #[ORM\Column(length: 180)]
   #[Assert\NotBlank]
   #[Assert\Email(message: 'Email invalide')]
@@ -24,7 +25,7 @@ abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterf
       $this->email = trim($value);
     }
   }
-
+  
   #[ORM\Column]
   public private(set) string $password = '' {
     get => $this->password;
@@ -32,103 +33,103 @@ abstract class BaseUser extends AbstractBaseEntity implements StatusEntityInterf
       $this->password = $value;
     }
   }
-
+  
   #[ORM\Column]
   protected bool $isVerified = false;
-
+  
   // === Informations personnelles ===
   #[ORM\Column(length: 100, nullable: true)]
   public ?string $firstName = null;
-
+  
   #[ORM\Column(length: 100, nullable: true)]
   public ?string $lastName = null;
-
+  
   public string $fullName {
     get => trim(($this->firstName ?? '') . ' ' . ($this->lastName ?? ''));
   }
-
+  
   public function getTitle(): string {
     return $this->fullName;
   }
-
+  
   // === Informations du studio ===
   #[ORM\Column(length: 255, nullable: true)]
   public ?string $logo = null;
-
+  
   #[ORM\Column(length: 20, nullable: true)]
   public ?string $phone = null;
-
+  
   // === Gestion du mot de passe oublié ===
   #[ORM\Column(length: 255, nullable: true)]
   public ?string $resetToken = null;
-
+  
   #[ORM\Column(type: 'datetime', nullable: true)]
   public ?\DateTimeInterface $resetTokenExpiresAt = null;
-
+  
   // === Timestamps ===
   #[ORM\Column(nullable: true)]
   public ?\DateTimeImmutable $lastLoginAt = null;
-
+  
   function __construct() {
     $now = new \DateTimeImmutable();
     $this->createdAt = $now;
     $this->updatedAt = $now;
   }
-
+  
   public function getUserIdentifier(): string {
     if ($this->email === '') {
       throw new \LogicException('User identifier (email) should not be empty.');
     }
     return $this->email;
   }
-
+  
   public function setHashedPassword(string $hashedPassword): void {
     $this->password = $hashedPassword;
   }
-
+  
   public function getEmail(): string {
     return $this->email;
   }
-
+  
   public function getPassword(): string {
     return $this->password;
   }
-
+  
   public function eraseCredentials(): void {}
-
+  
   // === Méthodes métier ===
   public function isVerified(): bool {
     return $this->isVerified;
   }
-
+  
   public function setIsVerified(bool $isVerified): static {
     $this->isVerified = $isVerified;
     return $this;
   }
-
+  
   public function recordLogin(): void {
     $this->lastLoginAt = new \DateTimeImmutable();
   }
-
+  
   public function generateResetToken(): string {
     $token = bin2hex(random_bytes(32));
     $this->resetToken = $token;
     $this->resetTokenExpiresAt = new \DateTimeImmutable('+1 hour');
     return $token;
   }
-
+  
   public function clearResetToken(): void {
     $this->resetToken = null;
     $this->resetTokenExpiresAt = null;
   }
-
+  
   public function isResetTokenValid(): bool {
     if ($this->resetToken === null || $this->resetTokenExpiresAt === null) {
       return false;
     }
     return $this->resetTokenExpiresAt > new \DateTimeImmutable();
   }
-
+  
   // === Sérialisation pour session ===
   public function __serialize(): array {
     $data = (array) $this;

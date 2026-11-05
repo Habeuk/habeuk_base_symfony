@@ -218,7 +218,6 @@ class ValidationExtractor {
           'type' => 'count',
           'min' => $constraint->min,
           'max' => $constraint->max,
-          'exactly' => $constraint->exactly,
           'minMessage' => $constraint->minMessage,
           'maxMessage' => $constraint->maxMessage,
           'exactMessage' => $constraint->exactMessage
@@ -230,9 +229,7 @@ class ValidationExtractor {
         if ($constraint->max === null) {
           unset($normalized['max'], $normalized['maxMessage']);
         }
-        if ($constraint->exactly === null) {
-          unset($normalized['exactly'], $normalized['exactMessage']);
-        }
+        
         break;
       
       case $constraint instanceof Assert\LessThan:
