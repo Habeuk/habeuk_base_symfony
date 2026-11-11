@@ -16,7 +16,9 @@ trait OwnerTrait {
   private ?BaseUser $owner = null;
   
   /**
-   * Contient les données exposes aux fronts sans pour autant comprometre la BD.
+   * Propriété miroir exposée au mapper DTO.
+   * N'est jamais assignée : getShowUuid() lit directement $uuid.
+   * Sa présence est requise pour que le mapper résolve le chemin "showUuid".
    */
   private ?BaseUser $ownerData = null;
   
